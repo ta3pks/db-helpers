@@ -14,8 +14,8 @@ macro_rules! params {
 
 #[macro_export]
 macro_rules! table {
-	($name:tt{$($rust_key:ident $rust_type:ty : $db_name:tt $db_type:expr ),+}) => {
-		#[derive(Debug)]
+	([$($drv:tt),*]$name:tt{$($rust_key:ident $rust_type:ty : $db_name:tt $db_type:expr ),+}) => {
+		#[derive($($drv),*)]
 		struct $name {
 		$(
 			$rust_key:$rust_type
