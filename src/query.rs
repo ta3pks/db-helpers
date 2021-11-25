@@ -14,10 +14,20 @@ macro_rules! params {
 
 #[macro_export]
 macro_rules! table {
-	([$($drv:tt),*]$name:tt{$($rust_key:ident $rust_type:ty : $db_name:tt $db_type:expr ),+}) => {
-		#[derive($($drv),*)]
+	(
+		$(#[$($meta:meta),*])?
+		$name:ident
+		{
+			$(
+				$(#[$($inner_meta:meta),*])?
+				$rust_key:ident $rust_type:ty : $db_name:tt $db_type:expr
+			 ),+
+		}
+	) => {
+		$(#[$($meta),*])?
 		struct $name {
 		$(
+			$(#[$($inner_meta),*])?
 			$rust_key:$rust_type
 		),+
 		}
