@@ -16,7 +16,7 @@ macro_rules! params {
 macro_rules! table {
 	(
 		$(#[$($meta:meta),*])?
-		$name:ident
+		$pub:vis $name:ident
 		{
 			$(
 				$(#[$($inner_meta:meta),*])?
@@ -25,7 +25,7 @@ macro_rules! table {
 		}
 	) => {
 		$(#[$($meta),*])?
-		struct $name {
+		$pub struct $name {
 		$(
 			$(#[$($inner_meta),*])?
 			$rust_key:$rust_type
