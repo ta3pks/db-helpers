@@ -41,7 +41,7 @@ macro_rules! table {
 				let fields = [
 					$(concat!("\"",stringify!($db_name),"\""," ",$db_type)),+
 				];
-				format!("CREATE TABLE IF NOT EXISTS {} ({})",stringify!($name).to_lowercase(),fields.join(","))
+				format!("CREATE TABLE IF NOT EXISTS {} ({});",stringify!($name).to_lowercase(),fields.join(","))
 			}
 		}
 		impl $crate::Table for $name{
