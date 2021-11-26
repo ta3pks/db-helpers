@@ -32,7 +32,7 @@ macro_rules! table {
 		),+
 		}
 		impl $name{
-			pub fn new($($rust_key:$rust_type),+) -> $name{
+			pub fn __new($($rust_key:$rust_type),+) -> $name{
 				Self{
 					$($rust_key),+
 				}
