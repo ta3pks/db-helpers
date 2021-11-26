@@ -3,15 +3,9 @@ description = "Various macros to help with database queries and tables"
 edition = "2021"
 license = "MIT"
 name = "db-helpers"
-version = "0.5.1"
+version = "0.6.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-postgres = {version = "0.7", optional = true}
-
-[features]
-default = ["tokio_postgres"]
-tokio_postgres = [
-  "tokio-postgres",
-]
+tokio-postgres = {version = "0.7"}

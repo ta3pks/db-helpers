@@ -49,7 +49,6 @@ macro_rules! table {
 				stringify!($name).to_lowercase()
 			}
 		}
-		#[cfg(feature="tokio_postgres")]
 		impl From<&$crate::Row> for $name{
 			fn from(r:&$crate::Row)->Self{
 				Self{
@@ -57,7 +56,6 @@ macro_rules! table {
 				}
 			}
 		}
-		#[cfg(feature="tokio_postgres")]
 		impl From<$crate::Row> for $name{
 			fn from(r:$crate::Row)->Self{
 				Self::from(&r)
