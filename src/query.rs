@@ -52,7 +52,7 @@ macro_rules! table {
 		impl From<&$crate::Row> for $name{
 			fn from(r:&$crate::Row)->Self{
 				Self{
-					$($rust_key:r.get(stringify!($rust_key))),+
+					$($rust_key:r.get(stringify!($db_name))),+
 				}
 			}
 		}
