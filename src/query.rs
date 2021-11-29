@@ -16,7 +16,7 @@ macro_rules! params {
 macro_rules! table {
 	(
 		$(#[$($meta:meta),*])?
-		$pub:vis $name:ident
+		$pub:vis $name:ident $([table_name=$tbl_name:expr])?
 		{
 			$(
 				$(#[$($inner_meta:meta),*])?
@@ -41,12 +41,14 @@ macro_rules! table {
 				let fields = [
 					$(concat!("\"",stringify!($db_name),"\""," ",$db_type)),+
 				];
-				format!("CREATE TABLE IF NOT EXISTS {} ({});",stringify!($name).to_lowercase(),fields.join(","))
+				format!("CREATE TABLE IF NOT EXISTS {} ({});",Self::table_name(),fields.join(","))
 			}
 		}
 		impl $crate::Table for $name{
 			fn table_name()->String{
-				stringify!($name).to_lowercase()
+				let mut name = stringify!($name).to_lowercase();
+				$(name=$tbl_name.to_string();)?
+				name
 			}
 		}
 		impl From<&$crate::Row> for $name{
