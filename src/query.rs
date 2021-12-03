@@ -20,7 +20,7 @@ macro_rules! table {
 		{
 			$(
 				$(#[$($inner_meta:meta),*])?
-				$rust_key:ident $rust_type:ty : $db_name:tt $db_type:expr
+				$field_pub:vis $rust_key:ident $rust_type:ty : $db_name:tt $db_type:expr
 			 ),+
 		}
 	) => {
@@ -28,7 +28,7 @@ macro_rules! table {
 		$pub struct $name {
 		$(
 			$(#[$($inner_meta),*])?
-			$rust_key:$rust_type
+			$field_pub $rust_key:$rust_type
 		),+
 		}
 		impl $name{
