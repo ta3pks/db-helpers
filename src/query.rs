@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! query {
 	($tbl:ty;$q:expr$(,$param:expr)*) => {
-		format!($q, $($param,)*table = <$tbl>::table_name()).as_str()
+		format!($q, $($param,)*table = <$tbl as $crate::Table>::table_name()).as_str()
 	};
 }
 
@@ -41,7 +41,7 @@ macro_rules! table {
 				let fields = [
 					$(concat!("\"",stringify!($db_name),"\""," ",$db_type)),+
 				];
-				format!("CREATE TABLE IF NOT EXISTS {} ({});",Self::table_name(),fields.join(","))
+				format!("CREATE TABLE IF NOT EXISTS {} ({});",<Self as $crate::Table>::table_name(),fields.join(","))
 			}
 		}
 		impl $crate::Table for $name{
