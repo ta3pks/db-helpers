@@ -11,5 +11,3 @@ pub trait Index
 		None
 	}
 }
-
-impl<T> Index for T where T: Table {}
