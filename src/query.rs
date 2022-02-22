@@ -31,19 +31,6 @@ macro_rules! table {
 			$field_pub $rust_key:$rust_type
 		),+
 		}
-		impl $name{
-			pub fn __new($($rust_key:$rust_type),+) -> $name{
-				Self{
-					$($rust_key),+
-				}
-			}
-			pub fn to_create_table_str()->String{
-				let fields = [
-					$(concat!("\"",stringify!($db_name),"\""," ",$db_type)),+
-				];
-				format!("CREATE TABLE IF NOT EXISTS {} ({});",<Self as $crate::Table>::table_name(),fields.join(","))
-			}
-		}
 		impl $crate::Table for $name{
 			fn table_name()->String{
 				let mut name = stringify!($name).to_lowercase();
@@ -51,17 +38,9 @@ macro_rules! table {
 				name
 			}
 		}
-		impl From<&$crate::Row> for $name{
-			fn from(r:&$crate::Row)->Self{
-				Self{
-					$($rust_key:r.get(stringify!($db_name))),+
-				}
-			}
+		impl $name{
+        $crate::pg_fns!(create_table_str $name $($db_name,$db_type);+);
 		}
-		impl From<$crate::Row> for $name{
-			fn from(r:$crate::Row)->Self{
-				Self::from(&r)
-			}
-		}
+    $crate::pg_fns!(from_table $name $($rust_key,$db_name);+);
 	};
 }
