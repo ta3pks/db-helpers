@@ -1,3 +1,5 @@
+# 11.1
+- params macro is moved behind pg feature and renamed to pg_params
 # 11.0
 - postgres specific `From<Row>` impl is behind `pg` feature
 - remove __new method

@@ -6,13 +6,6 @@ macro_rules! query {
 }
 
 #[macro_export]
-macro_rules! params {
-	($($param:expr),*) => {
-		&[$(&$param),*]
-	};
-}
-
-#[macro_export]
 macro_rules! table {
 	(
 		$(#[$($meta:meta),*])?
@@ -39,6 +32,14 @@ macro_rules! table {
 			}
 		}
 		impl $name{
+        pub fn is_valid_column_name(name:&str)->bool{
+            match name{
+                $(
+                    stringify!($db_name) => true,
+                )+
+                _ => false
+            }
+        }
         $crate::pg_fns!(create_table_str $name $($db_name,$db_type);+);
 		}
     $crate::pg_fns!(from_table $name $($rust_key,$db_name);+);

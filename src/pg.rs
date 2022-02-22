@@ -31,3 +31,10 @@ macro_rules! pg_fns {
 	(from_table $name:ident $($rust_name:ident,$db_name:tt);+) => {};
 	(create_table_str $name:ident $($db_name:tt,$db_type:expr);+) => {};
 }
+#[cfg(feature = "pg")]
+#[macro_export]
+macro_rules! pg_params {
+	($($param:expr),*) => {
+		&[$(&$param),*]
+	};
+}
