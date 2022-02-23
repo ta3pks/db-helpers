@@ -1,19 +1,26 @@
+mod parsers;
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
-use syn::{parse, DeriveInput};
+use quote::quote;
+use syn::DeriveInput;
 
-#[proc_macro_derive(Table, attributes(table))]
+#[proc_macro_derive(Tbl, attributes(table))]
 pub fn parse_table(t: TokenStream) -> TokenStream
 {
-	let root: DeriveInput = parse(t).unwrap();
-	let name = format_ident!("{}", root.ident.to_string().to_lowercase());
-	let tbl_name = name.to_string();
-	println!("{:#?}", &root);
+	let root: DeriveInput = syn::parse_macro_input!(t);
+	let name = &root.ident;
+	let table_name = root.ident.to_string().to_lowercase();
+	let (s, fields) = parsers::parse_root(&root.data);
+	dbg!(s, fields);
 	quote!(
-		impl #tbl_name {
-			fn table_name() -> &'static str {
-		  #tbl_name
-			}
+	  impl #name{
+		  fn table_name() -> &'static str {
+			  #table_name
+		  }
+	  }
+		impl db_helpers::Table for  #name {
+		fn table_name() -> String {
+			#name::table_name().to_string()
+		}
 		   }
 	)
 	.into()

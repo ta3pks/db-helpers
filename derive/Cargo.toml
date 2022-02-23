@@ -11,4 +11,4 @@ proc-macro2 = "1.0.36"
 quote = "1.0.15"
 syn = { version = "1.0.86", features = ["extra-traits"] }
 tap = "1.0.1"
-traits = { path = "../traits" }
+types = { path = "../types" }
