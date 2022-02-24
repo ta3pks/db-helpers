@@ -16,8 +16,7 @@ fn run(t: TokenStream) -> Result<TokenStream>
 {
 	let root: DeriveInput = parse(t).unwrap();
 	let name = &root.ident;
-	let table_name = root.ident.to_string().to_lowercase();
-	let (_s, _fields) = parsers::parse_root(&root)?;
+	let (_s, _fields, table_name) = parsers::parse_root(&root)?;
 	Ok(quote!(
 	  impl #name{
 		  fn table_name() -> &'static str {
