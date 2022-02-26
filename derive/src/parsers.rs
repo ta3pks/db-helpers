@@ -1,13 +1,22 @@
-use std::collections::HashMap;
+use crate::utils::parse_attrs;
 
-use syn::{spanned::Spanned, DataStruct, DeriveInput, FieldsNamed};
+use syn::{
+	punctuated::Punctuated, spanned::Spanned, token::Comma, DataStruct, DeriveInput, Field, FieldsNamed, Ident
+};
 
 use crate::utils::fail;
+pub struct ParsedRootMeta<'a>
+{
+	pub self_struct: &'a DataStruct,
+	pub fields: &'a FieldsNamed,
+	pub table_name: String,
+	pub index: Option<String>,
+}
 
-pub fn parse_root(i: &DeriveInput) -> crate::Result<(&DataStruct, &FieldsNamed, String)>
+pub fn parse_root(i: &DeriveInput) -> crate::Result<ParsedRootMeta>
 //{{{
 {
-	let attrs = parse_attrs(i, &["name"])?; // top level
+	let attrs = parse_attrs(&i.attrs, &["name", "index"])?; // top level
 	match i.data {
 		syn::Data::Struct(ref d) => match d.fields {
 			syn::Fields::Named(ref f) => {
@@ -15,14 +24,15 @@ pub fn parse_root(i: &DeriveInput) -> crate::Result<(&DataStruct, &FieldsNamed, 
 					fail(i.ident.span(), "struct must have at least one named field")?;
 					unreachable!()
 				}
-				Ok((
-					d,
-					f,
-					attrs
+				Ok(ParsedRootMeta {
+					self_struct: d,
+					fields: f,
+					table_name: attrs
 						.get("name")
-						.cloned()
-						.unwrap_or_else(|| i.ident.to_string().to_lowercase()),
-				))
+						.map(|v| v.value.clone())
+						.unwrap_or_else(|| i.ident.to_string()),
+					index: attrs.get("index").map(|v| v.value.clone()),
+				})
 			}
 			_ => {
 				fail(i.ident.span(), "Only named struct fields are supported")?;
@@ -33,69 +43,39 @@ pub fn parse_root(i: &DeriveInput) -> crate::Result<(&DataStruct, &FieldsNamed, 
 	}
 } //}}}
 
-fn parse_attrs(i: &DeriveInput, supported_attrs: &[&str])
-	-> crate::Result<HashMap<String, String>>
-//{{{
+pub struct FieldInfo
 {
-	let mut attrs = HashMap::new();
-	for attr in i.attrs.iter().filter(|a| a.path.is_ident("table")) {
-		{
-			let meta = attr.parse_meta().map_err(|e| e.to_compile_error())?;
-			let attr = match meta {
-				//{{{
-				syn::Meta::List(a) => {
-					if a.nested.is_empty() {
-						fail(
-							a.path.span(),
-							"table attribute must have at least one argument",
-						)?;
-					}
-					a.nested
-				}
-				_ => {
-					fail(
-						attr.bracket_token.span,
-						"table attribute parameters must be in table(key=\"value\",...) format",
-					)?;
-					unreachable!()
-				}
-			}; //}}}
-			for attr in attr {
-				match attr {
-					//{{{
-					syn::NestedMeta::Meta(syn::Meta::NameValue(a)) => {
-						if !supported_attrs.iter().any(|v| a.path.is_ident(v)) {
-							fail(
-								a.path.span(),
-								format!(
-									"unsupported attribute: {}",
-									a.path
-										.get_ident()
-										.map(|i| i.to_string())
-										.unwrap_or_default()
-								),
-							)?;
-						}
-						let ident = a.path.get_ident().unwrap().to_string();
-						let val = if let syn::Lit::Str(s) = a.lit {
-							s.value()
-						} else {
-							fail(a.lit.span(), "only string values are supported")?;
-							unreachable!()
-						};
-						attrs.insert(ident, val);
-					}
-					//}}}
-					_ => {
-						fail(
-							attr.span(),
-							"table attribute parameters must be in table(key=\"value\",...) format",
-						)?;
-					}
-				}
-			}
-		}
+	pub name: Ident,
+	pub db_name: String,
+	pub db_query: String,
+}
+pub fn parse_fields(f: &Punctuated<Field, Comma>) -> crate::Result<Vec<FieldInfo>>
+{
+	let mut fields = Vec::new();
+	for field in f {
+		let attrs = parse_attrs(&field.attrs, &["name", "q"])?;
+		let ident = field
+			.ident
+			.as_ref()
+			.ok_or_else(|| fail(field.span(), "Fields must have an identifier").unwrap_err())?;
+		let name = attrs
+			.get("name")
+			.map(|v| v.value.clone())
+			.unwrap_or_else(|| ident.to_string().to_lowercase());
+		let q = if let Some(v) = attrs.get("q") {
+			v.value.clone()
+		} else {
+			fail(
+				field.span(),
+				"Fields must have a query please add q=\"<YOUR QUERY>\"",
+			)?;
+			unreachable!()
+		};
+		fields.push(FieldInfo {
+			name: ident.clone(),
+			db_name: name,
+			db_query: q,
+		});
 	}
-	Ok(attrs)
-	//}}}
+	Ok(fields)
 }
