@@ -2,7 +2,7 @@
 
 ### Usage
 ```rust
-#[derive(Tbl)]
+#[derive(Table)]
 //index is optional
 #[table(name = "foo_db", index = "...")]
 struct Foo
