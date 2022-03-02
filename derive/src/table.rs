@@ -5,7 +5,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::{parse2, DeriveInput};
 
-pub fn table(t: TokenStream) -> Result<TokenStream>
+pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 {
 	let root: DeriveInput = parse2(t).unwrap();
 	let name = &root.ident;
@@ -19,11 +19,13 @@ pub fn table(t: TokenStream) -> Result<TokenStream>
 	let field_names = fields.iter().map(|v| v.db_name.clone());
 	let pg_impls = pg::init(name, &table_name, &fields, &index);
 	let getters = field_getters(&fields);
+	let non_snake_case: TokenStream = "#[allow(non_snake_case)]".parse().unwrap();
 	Ok(quote!(
 	  impl #name{
 		  pub const fn __table_name() -> &'static str {
 			  #table_name
 		  }
+			#non_snake_case
 	  pub fn __columns()->&'static[&'static str]{
 			&[#(#field_names),*]
 	  }
@@ -39,9 +41,13 @@ fn field_getters(fields: &[FieldInfo]) -> TokenStream
 		.iter()
 		.map::<TokenStream, _>(|FieldInfo { name, db_name, .. }| {
 			let name = name.to_string();
-			format!("pub const fn __field_{name}()->&'static str{{\"{db_name}\"}}",)
-				.parse()
-				.unwrap()
+			format!(
+				r#"
+          #[allow(non_snake_case)]
+          pub const fn __field_{name}()->&'static str{{"{db_name}"}}"#,
+			)
+			.parse()
+			.unwrap()
 		});
 	quote!(#(#f)*)
 }
