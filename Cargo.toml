@@ -3,8 +3,9 @@ description = "Various macros to help with database queries and tables"
 edition = "2021"
 license = "GPL-2.0"
 name = "db-helpers"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Nikos Efthias<nikos@mugsoft.io>"]
+repository = "https://github.com/NikosEfthias/db-helpers"
 [workspace]
 members = ["derive"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

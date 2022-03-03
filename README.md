@@ -57,16 +57,17 @@ params!("superman"))
 ```
 
 ### Error Messages
-![invalid_struct](./img/invalid_struct.png)
-![missing_fields](./img/missing_fields.png)
-![no_field](./img/no_field.png)
-![missing_close](./img/missing_close.png)
+
+![invalid_struct](https://github.com/NikosEfthias/db-helpers/raw/master/img/invalid_struct.png)
+![missing_fields](https://github.com/NikosEfthias/db-helpers/raw/master/img/missing_fields.png)
+![no_field](https://github.com/NikosEfthias/db-helpers/raw/master/img/no_field.png)
+![missing_close](https://github.com/NikosEfthias/db-helpers/raw/master/img/missing_close.png)
 
 # How to upgrade from 0x releases
-Please check [changelog](./Changelog.md) for details
+Please check [changelog](https://github.com/NikosEfthias/db-helpers/blob/master/Changelog.md) for details
 
 
-TODO:
+# TODO:
 - [ ] allow using format macro inside Q
 - [ ] *- operator meaning all fields but the defined ones `Users::{*-password}`
 - [ ] infer postgres types from rust type where possible making `q` argument optional
