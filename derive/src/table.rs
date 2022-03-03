@@ -34,6 +34,7 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 	let non_snake_case: TokenStream = "#[allow(non_snake_case)]".parse().unwrap();
 	Ok(quote!(
 	  impl #name{
+		#non_snake_case
 		  pub const fn __table_name() -> &'static str {
 			  #table_name
 		  }

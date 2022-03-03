@@ -65,8 +65,10 @@ TIP: 'struct_name::{{' part cannot contain spaces"#
 				.unwrap_or_else(|| panic!("missing closing '}}' for field names after {curr}"));
 			all_fields.extend(fields.into_iter());
 		}
+		if all_fields.is_empty() {
+			panic!("no field of {struct_name} specified perhaps you meant to use *");
+		}
 		all_fields.iter().enumerate().for_each(|(i, field)| {
-			dbg!(field);
 			let table = meta
 				.get(&format!("{struct_name}.__TABLE__"))
 				.unwrap_or_else(|| panic!("{struct_name} is not created with #[derive(Table)]"));
