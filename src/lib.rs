@@ -1,3 +1,4 @@
+pub mod legacy;
 pub mod pg;
 pub mod query;
 pub use derive::*;

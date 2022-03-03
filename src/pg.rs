@@ -20,7 +20,7 @@ macro_rules! pg_fns {
 				let fields = [
 					$(concat!("\"",stringify!($db_name),"\""," ",$db_type)),+
 				];
-				format!("CREATE TABLE IF NOT EXISTS {} ({});",<Self as $crate::Table>::table_name(),fields.join(","))
+				format!("CREATE TABLE IF NOT EXISTS {} ({});",<Self as $crate::legacy::Table>::table_name(),fields.join(","))
 			}
   };
 }

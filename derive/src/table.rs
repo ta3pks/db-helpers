@@ -1,9 +1,17 @@
+use std::{
+	collections::HashMap, sync::{Arc, Mutex}
+};
+
 use super::{
 	parsers::{self, parse_fields, FieldInfo, ParsedRootMeta}, pg
 };
+use lazy_static::lazy_static;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse2, DeriveInput};
+use syn::{parse2, DeriveInput, Ident};
+lazy_static! {
+	pub(crate) static ref FIELD_MAP: Arc<Mutex<HashMap<String, String>>> = Default::default();
+}
 
 pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 {
@@ -15,10 +23,14 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 		index,
 		..
 	} = parsers::parse_root(&root)?;
+	{
+		let mut map = FIELD_MAP.lock().unwrap();
+		map.insert(format!("{name}.__TABLE__"), table_name.to_string());
+	}
 	let fields = parse_fields(&fields.named)?;
 	let field_names = fields.iter().map(|v| v.db_name.clone());
 	let pg_impls = pg::init(name, &table_name, &fields, &index);
-	let getters = field_getters(&table_name, &fields);
+	field_getters(name, &fields);
 	let non_snake_case: TokenStream = "#[allow(non_snake_case)]".parse().unwrap();
 	Ok(quote!(
 	  impl #name{
@@ -29,27 +41,15 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 	  pub const fn __columns()->&'static[&'static str]{
 			&[#(#field_names),*]
 	  }
-	#getters
 	  }
 	   #pg_impls
 	))
 }
 
-fn field_getters(table_name: &str, fields: &[FieldInfo]) -> TokenStream
+fn field_getters(struct_name: &Ident, fields: &[FieldInfo])
 {
-	let f = fields
-		.iter()
-		.map::<TokenStream, _>(|FieldInfo { name, db_name, .. }| {
-			let name = name.to_string();
-			format!(
-				r#"
-          #[allow(non_snake_case)]
-          pub const fn __field_with_table_{name}()->&'static str{{"{table_name}.{db_name}"}}
-          pub const fn __field_{name}()->&'static str{{"{db_name}"}}
-          "#,
-			)
-			.parse()
-			.unwrap()
-		});
-	quote!(#(#f)*)
+	let mut meta = FIELD_MAP.lock().unwrap();
+	fields.iter().for_each(|FieldInfo { name, db_name, .. }| {
+		meta.insert(format!("{struct_name}.{name}"), db_name.to_string());
+	});
 }

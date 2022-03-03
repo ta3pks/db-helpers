@@ -21,31 +21,31 @@ fn main()
 {
 	assert_eq!(
 		Q!("select Foo::{_bar} from Foo::__TABLE__"),
-		"select bar from foos"
+		r#"select "bar" from foos"#
 	);
 	//more fields
 	assert_eq!(
 		Q!("select Foo::{_bar,other} from Foo::__TABLE__"),
-		"select bar , other from foos"
+		r#"select "bar", "other" from foos"#
 	);
 	assert_eq!(
 		Q!("select Foo::{_bar, other} from Foo::__TABLE__"),
-		"select bar , other from foos"
+		r#"select "bar", "other" from foos"#
 	);
 	//more spaces
 	assert_eq!(
 		Q!("select Foo::{ _bar   , other} from Foo::__TABLE__"),
-		"select bar , other from foos"
+		r#"select "bar", "other" from foos"#
 	);
 	//with_table_name
 	assert_eq!(
 		Q!("select Foo::{ >_bar   , other} from Foo::__TABLE__"),
-		"select foos.bar , other from foos"
+		r#"select foos.bar, "other" from foos"#
 	);
 	//db cast should work as expected
 	assert_eq!(
 		//mind the spaces between openning and closing parentheses
 		Q!("insert into Foo::__TABLE__ ( Foo::{_bar,other} ) values ($1, $2::int)"),
-		"insert into foos ( bar , other ) values ($1, $2::int)"
+		r#"insert into foos ( "bar", "other" ) values ($1, $2::int)"#
 	);
 }

@@ -1,3 +1,4 @@
+use super::table::FIELD_MAP;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
@@ -11,10 +12,11 @@ pub fn query(t: TokenStream) -> crate::Result<TokenStream>
 		.expect("expecting a string literal")
 		.split(' ')
 		.peekable();
+	let meta = FIELD_MAP.lock().unwrap();
 	let mut q = Vec::new();
 	while let Some(curr) = tokens.non_empty_next() {
 		if !["::__TABLE__", "::{"].iter().any(|v| curr.contains(v)) {
-			q.push(quote! {#curr});
+			q.push(curr.to_string());
 			continue;
 		}
 		//handle table name
@@ -25,7 +27,11 @@ pub fn query(t: TokenStream) -> crate::Result<TokenStream>
 				panic!("expecting a_valid_struct::__TABLE__  found {curr}");
 			}
 			let struct_name = format_ident!("{struct_name}");
-			q.push(quote! {#struct_name::__table_name()});
+			q.push(
+				meta.get(&format!("{struct_name}.__TABLE__"))
+					.unwrap_or_else(|| panic!("{struct_name} is not created with #[derive(Table)]"))
+					.to_string(),
+			);
 			continue;
 		}
 		// handle fields
@@ -61,28 +67,29 @@ TIP: 'struct_name::{{' part cannot contain spaces"#
 		}
 		all_fields.iter().enumerate().for_each(|(i, field)| {
 			dbg!(field);
+			let table = meta
+				.get(&format!("{struct_name}.__TABLE__"))
+				.unwrap_or_else(|| panic!("{struct_name} is not created with #[derive(Table)]"));
 			if field.starts_with('>') {
 				let field = field.trim_start_matches('>');
-				q.push(
-					format!("{struct_name}::__field_with_table_{field}()")
-						.parse()
-						.unwrap(),
-				);
+				q.push(format!(
+					"{table}.{}{}",
+					meta.get(&format!("{struct_name}.{field}"))
+						.unwrap_or_else(|| panic!("{struct_name} does not have field {field}")),
+					if i < all_fields.len() - 1 { "," } else { "" }
+				));
 			} else {
-				q.push(format!("{struct_name}::__field_{field}()").parse().unwrap());
-			}
-			if i < all_fields.len() - 1 {
-				q.push(quote!(","));
+				q.push(format!(
+					r#""{}"{}"#,
+					meta.get(&format!("{struct_name}.{field}"))
+						.unwrap_or_else(|| panic!("{struct_name} does not have field {field}")),
+					if i < all_fields.len() - 1 { "," } else { "" }
+				));
 			}
 		});
 	}
-	let q = q.into_iter();
-	Ok(quote! {	  {
-	  [
-		#(#q),*
-	].join(" ")
-	}
-	})
+	let q = q.join(" ");
+	Ok(quote! {#q})
 }
 
 trait NonEmptyNext<'a>

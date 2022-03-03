@@ -2,13 +2,13 @@
 #[deprecated = "use query_unchecked instead"]
 macro_rules! query {
 	($tbl:ty;$q:expr$(,$param:expr)*) => {
-		format!($q, $($param,)*table = <$tbl as $crate::Table>::table_name()).as_str()
+		format!($q, $($param,)*table = <$tbl as $crate::legacy::Table>::table_name()).as_str()
 	};
 }
 #[macro_export]
 macro_rules! query_unchecked {
 	($tbl:ty;$q:expr$(,$param:expr)*) => {
-		format!($q, $($param,)*table = <$tbl as $crate::Table>::table_name()).as_str()
+		format!($q, $($param,)*table = <$tbl as $crate::legacy::Table>::table_name()).as_str()
 	};
 }
 #[macro_export]
@@ -30,7 +30,7 @@ macro_rules! table {
 			$field_pub $rust_key:$rust_type
 		),+
 		}
-		impl $crate::Table for $name{
+		impl $crate::legacy::Table for $name{
 			fn table_name()->String{
 				let mut name = stringify!($name).to_lowercase();
 				$(name=$tbl_name.to_string();)?
