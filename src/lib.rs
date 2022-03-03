@@ -1,8 +1,8 @@
 pub mod legacy;
 pub mod pg;
 pub mod query;
-pub use derive::*;
+pub use db_helpers_derive::*;
 #[cfg(feature = "pg")]
-pub use foreigns::tokio_postgres;
+pub use tokio_postgres;
 #[cfg(feature = "pg")]
-pub use foreigns::tokio_postgres::Row;
+pub use tokio_postgres::Row;

@@ -1,18 +1,18 @@
 [package]
 description = "Various macros to help with database queries and tables"
 edition = "2021"
-license = "MIT"
+license = "GPL-2.0"
 name = "db-helpers"
 version = "1.0.0"
 authors = ["Nikos Efthias<nikos@mugsoft.io>"]
 [workspace]
-members = ["derive", "foreigns"]
+members = ["derive"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-foreigns = { path = "./foreigns", optional = true }
-derive = { path = "./derive" }
+db-helpers-derive = { path = "./derive" }
+tokio-postgres = { version = "0.7", optional = true }
 
 [features]
 default = ["pg"]
-pg = ["foreigns/pg", "derive/pg"]
+pg = ["tokio-postgres", "db-helpers-derive/pg"]
