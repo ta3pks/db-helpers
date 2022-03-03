@@ -18,7 +18,7 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 	let fields = parse_fields(&fields.named)?;
 	let field_names = fields.iter().map(|v| v.db_name.clone());
 	let pg_impls = pg::init(name, &table_name, &fields, &index);
-	let getters = field_getters(&fields);
+	let getters = field_getters(&table_name, &fields);
 	let non_snake_case: TokenStream = "#[allow(non_snake_case)]".parse().unwrap();
 	Ok(quote!(
 	  impl #name{
@@ -26,7 +26,7 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 			  #table_name
 		  }
 			#non_snake_case
-	  pub fn __columns()->&'static[&'static str]{
+	  pub const fn __columns()->&'static[&'static str]{
 			&[#(#field_names),*]
 	  }
 	#getters
@@ -35,7 +35,7 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 	))
 }
 
-fn field_getters(fields: &[FieldInfo]) -> TokenStream
+fn field_getters(table_name: &str, fields: &[FieldInfo]) -> TokenStream
 {
 	let f = fields
 		.iter()
@@ -44,7 +44,7 @@ fn field_getters(fields: &[FieldInfo]) -> TokenStream
 			format!(
 				r#"
           #[allow(non_snake_case)]
-          pub const fn __field_{name}()->&'static str{{"{db_name}"}}"#,
+          pub const fn __field_{name}()->&'static str{{"{table_name}.{db_name}"}}"#,
 			)
 			.parse()
 			.unwrap()
