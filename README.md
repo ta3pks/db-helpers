@@ -1,23 +1,73 @@
 # db_helpers
+db_helpers provide various helpers to simplify and make safer to interact with databases.  
+This is not an orm library the idea is simply to be able to replace inline queries and start getting benefits without learning a new library
+
+### Why did I create db_helpers
+- compile time checked field names in queries to make regular sql little bit more secure.
+- To reduce boilerplate ( creating From<Row> for every struct namely)
+
+### Features
+- Create table creation and indexing queries.(feature flag)
+- Reduce boilerplate by implementing certain default such as row to struct conversion(feature flag)
+- Compile time field name validation
+- Meaningful error messages 
 
 ### Usage
 ```rust
+use db_helpers::{Table,Q};
 #[derive(Table)]
 //index is optional
-#[table(name = "foo_db", index = "...")]
-struct Foo
+//__TABLE__ key is automatically replaced with table_name
+#[table(name = "users", index = "create unique index if not exists unique_usernames_of_users on __TABLE__ (username)")]
+struct User
 {
-//if name is not specified lowercased fieldname is used by default 
+//if name is not specified lowercase fieldname is used by default 
 //q is mandatory
-	#[table(name = "id", q = "int primary key not null")]
-	_id: i32,
-	#[table(name = "name", q = "text")]
-	_name: String,
+	#[table(name = "id", q = "bigserial primary key not null")]
+	_id: i64,
+	//name of this field is assumed username
+	#[table( q = "text")]
+	username: String,
+}
+#[derive(Table)]
+//index is optional
+#[table(name = "ops")]
+struct Op{
+#[table(q="bigserial not null primary key")]
+id:i64,
+#[table(q="bigint not null references")]
+user_id:i64,
 }
 ```
 ```rust 
 db.batch_execure(
 //Available if pg feature is enabled
-[Foo::__pg_create_table_str(),Foo::__pg_index()].join(";")
+[User::__pg_create_table_str(),User::__pg_index()].join(";")
 ).await;
+//unfortunately for the time being `<struct>::{` part cannot contain spaces smarter parsing is in the todo list
+let User:User = db.query_one(Q!("select User::{_id,username} from User::__TABLE__"),params!()).await.unwrap();
+db.execute(Q!("insert into ( Foo::{username} ) VALUES ($1)"),params!("superman")).await.unwrap();
+//you can also use tablename.fieldname format using > in the beginning of the field
+//produces `select id , users.username from users`
+let User:User = db.query_one(Q!("select User::{_id,>username} from User::__TABLE__"),params!()).await.unwrap();
+let ops : Vec<Op> = db
+.query(Q!("select * from Op::__TABLE__ where Op::{user_id} = (select Foo::{_id} from Foo::__TABLE__ where Foo::{username} = $1)"),
+params!("superman"))
+.await.unwrap().iter(Into::into).collect();
 ```
+
+### Error Messages
+![invalid_struct](./img/invalid_struct.png)
+![missing_fields](./img/missing_fields.png)
+![no_field](./img/no_field.png)
+![missing_close](./img/missing_close.png)
+
+# How to upgrade from 0x releases
+Please check [changelog](./Changelog.md) for details
+
+
+TODO:
+- [ ] allow using format macro inside Q
+- [ ] infer postgres types from rust type where possible making `q` argument optional
+- [ ] parse `Q` smarter to allow using spaces in more places as well as no spaces in places like inserts
+- [ ] Sqlite backend
