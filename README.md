@@ -68,6 +68,7 @@ Please check [changelog](./Changelog.md) for details
 
 TODO:
 - [ ] allow using format macro inside Q
+- [ ] *- operator meaning all fields but the defined ones `Users::{*-password}`
 - [ ] infer postgres types from rust type where possible making `q` argument optional
 - [ ] parse `Q` smarter to allow using spaces in more places as well as no spaces in places like inserts
 - [ ] Sqlite backend
