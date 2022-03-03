@@ -129,7 +129,7 @@ mod tests
 	fn it_works()
 	{
 		let cases = trybuild::TestCases::new();
-		cases.compile_fail("tests/failures/*.rs");
+		cases.compile_fail("tests/fail/*.rs");
 		cases.pass("tests/success/*.rs");
 	}
 }

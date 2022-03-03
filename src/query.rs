@@ -1,10 +1,16 @@
 #[macro_export]
+#[deprecated = "use query_unchecked instead"]
 macro_rules! query {
 	($tbl:ty;$q:expr$(,$param:expr)*) => {
 		format!($q, $($param,)*table = <$tbl as $crate::Table>::table_name()).as_str()
 	};
 }
-
+#[macro_export]
+macro_rules! query_unchecked {
+	($tbl:ty;$q:expr$(,$param:expr)*) => {
+		format!($q, $($param,)*table = <$tbl as $crate::Table>::table_name()).as_str()
+	};
+}
 #[macro_export]
 macro_rules! table {
 	(

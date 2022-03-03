@@ -5,14 +5,13 @@ license = "MIT"
 name = "db-helpers"
 version = "0.11.1"
 [workspace]
-members = ["derive", "types"]
+members = ["derive", "foreigns"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-postgres = { version = "0.7", optional = true }
+foreigns = { path = "./foreigns", optional = true }
 derive = { path = "./derive" }
-types = { path = "./types" }
 
 [features]
 default = ["pg"]
-pg = ["tokio-postgres"]
+pg = ["foreigns/pg", "derive/pg"]

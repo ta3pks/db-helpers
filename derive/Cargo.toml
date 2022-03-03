@@ -10,11 +10,9 @@ proc-macro = true
 proc-macro2 = "1.0.36"
 quote = "1.0.15"
 syn = { version = "1.0.86", features = ["extra-traits"] }
-types = { path = "../types" }
-tokio-postgres = { version = "0.7", optional = true }
 [dev-dependencies]
 db-helpers = { path = "../" }
 trybuild = "1.0.56"
 [features]
 default = ["pg"]
-pg = ["tokio-postgres"]
+pg = []
