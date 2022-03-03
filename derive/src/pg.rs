@@ -14,7 +14,8 @@ pub fn init(
 {
 	let from_row_ref = impl_from_row_ref(struct_name, fields);
 	let create_table_str = pg_create_table_str(struct_name, table_name, fields);
-	let impl_index = impl_index(struct_name, index);
+	let index = index.clone().map(|i| i.replace("__TABLE__", table_name));
+	let impl_index = impl_index(struct_name, &index);
 	quote!(
 	#create_table_str
 	  #from_row_ref

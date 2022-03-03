@@ -60,7 +60,17 @@ TIP: 'struct_name::{{' part cannot contain spaces"#
 			all_fields.extend(fields.into_iter());
 		}
 		all_fields.iter().enumerate().for_each(|(i, field)| {
-			q.push(format!("{struct_name}::__field_{field}()").parse().unwrap());
+			dbg!(field);
+			if field.starts_with('>') {
+				let field = field.trim_start_matches('>');
+				q.push(
+					format!("{struct_name}::__field_with_table_{field}()")
+						.parse()
+						.unwrap(),
+				);
+			} else {
+				q.push(format!("{struct_name}::__field_{field}()").parse().unwrap());
+			}
 			if i < all_fields.len() - 1 {
 				q.push(quote!(","));
 			}

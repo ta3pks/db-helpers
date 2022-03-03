@@ -44,7 +44,9 @@ fn field_getters(table_name: &str, fields: &[FieldInfo]) -> TokenStream
 			format!(
 				r#"
           #[allow(non_snake_case)]
-          pub const fn __field_{name}()->&'static str{{"{table_name}.{db_name}"}}"#,
+          pub const fn __field_with_table_{name}()->&'static str{{"{table_name}.{db_name}"}}
+          pub const fn __field_{name}()->&'static str{{"{db_name}"}}
+          "#,
 			)
 			.parse()
 			.unwrap()
