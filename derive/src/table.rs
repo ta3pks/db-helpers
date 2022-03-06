@@ -33,18 +33,23 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 	field_getters(name, &fields);
 	let non_snake_case: TokenStream = "#[allow(non_snake_case)]".parse().unwrap();
 	Ok(quote!(
-	  impl #name{
-		#non_snake_case
-		  pub const fn __table_name() -> &'static str {
-			  #table_name
-		  }
-			#non_snake_case
-	  pub const fn __columns()->&'static[&'static str]{
-			&[#(#field_names),*]
-	  }
-	  }
-	   #pg_impls
-	))
+		impl #name{
+		  #non_snake_case
+			pub const fn __table_name() -> &'static str {
+				#table_name
+			}
+			  #non_snake_case
+		pub const fn __columns()->&'static[&'static str]{
+			  &[#(#field_names),*]
+		}
+		}
+	  impl db_helpers::legacy::Table for #name{
+		fn table_name() -> String{
+			#table_name.to_string()
+	}
+	}
+		 #pg_impls
+	  ))
 }
 
 fn field_getters(struct_name: &Ident, fields: &[FieldInfo])

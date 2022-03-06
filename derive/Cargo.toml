@@ -1,7 +1,7 @@
 [package]
 description = "Various macros to help with database queries and tables"
 name = "db-helpers-derive"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Nikos Efthias<nikos@mugsoft.io>"]
 license = "GPL-2.0"
 edition = "2021"
