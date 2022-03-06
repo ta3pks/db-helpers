@@ -1,17 +1,12 @@
 use super::table::FIELD_MAP;
-use proc_macro2::TokenStream;
+use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote};
 
 pub fn query(t: TokenStream) -> crate::Result<TokenStream>
 {
-	let t = t.to_string();
-	let mut tokens = t
-		.strip_prefix('"')
-		.expect("expecting a string literal")
-		.strip_suffix('"')
-		.expect("expecting a string literal")
-		.split(' ')
-		.peekable();
+	let (tokens, _rest) = parse_query(t);
+	let mut tokens = tokens.split(' ');
+
 	let meta = FIELD_MAP.lock().unwrap();
 	let mut q = Vec::new();
 	while let Some(curr) = tokens.non_empty_next() {
@@ -91,7 +86,11 @@ TIP: 'struct_name::{{' part cannot contain spaces"#
 		});
 	}
 	let q = q.join(" ");
-	Ok(quote! {#q})
+	if let Some(rest) = _rest {
+		Ok(quote! {format!(#q #rest)})
+	} else {
+		Ok(quote! {#q})
+	}
 }
 
 trait NonEmptyNext<'a>
@@ -139,6 +138,27 @@ impl<'a, I: Iterator<Item = &'a str>> NonEmptyNext<'a> for I
 		} else {
 			None
 		}
+	}
+}
+
+fn parse_query(t: TokenStream) -> (String, Option<TokenStream>)
+{
+	let mut tokens = t.into_iter();
+	let q = if let Some(TokenTree::Literal(l)) = tokens.next() {
+		l.to_string()
+			.strip_prefix('"')
+			.expect("expecting a string literal")
+			.strip_suffix('"')
+			.expect("expecting a string literal")
+			.to_string()
+	} else {
+		panic!("expected a string literal");
+	};
+	let rest = tokens.collect::<TokenStream>();
+	if rest.is_empty() {
+		(q, None)
+	} else {
+		(q, Some(rest))
 	}
 }
 #[cfg(test)]

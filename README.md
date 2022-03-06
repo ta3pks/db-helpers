@@ -54,6 +54,14 @@ let ops : Vec<Op> = db
 .query(Q!("select * from Op::__TABLE__ where Op::{user_id} = (select Foo::{_id} from Foo::__TABLE__ where Foo::{username} = $1)"),
 params!("superman"))
 .await.unwrap().iter(Into::into).collect();
+
+
+//it also supports runtime args using format macro
+//if no additional arguments provided Q produces a &'static str otherwise it passes everything to format! macro 
+Q!(
+		"select Foo::{>username} from Foo::__TABLE__ where Foo::{>_id} in ({})",
+		["1", "2", "3"].join(",")
+	)
 ```
 
 ### Error Messages
@@ -68,7 +76,7 @@ Please check [changelog](https://github.com/NikosEfthias/db-helpers/blob/master/
 
 
 # TODO:
-- [ ] allow using format macro inside Q
+- [x] allow using format macro inside Q
 - [ ] *- operator meaning all fields but the defined ones `Users::{*-password}`
 - [ ] infer postgres types from rust type where possible making `q` argument optional
 - [ ] parse `Q` smarter to allow using spaces in more places as well as no spaces in places like inserts
