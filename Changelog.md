@@ -1,3 +1,5 @@
+# 1.1.0
+- Table derive macro now implements legacy Table trait by default so query_unchecked can be used with the derived tables without manual impl
 # 1.0.0
 - Table is now a derive macro check Readme for how to use
 - Old `Table` and `Index` traits are moved under `legacy` module to enable progressive upgrades from 0x versions to 1 with minimal code changes
