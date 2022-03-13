@@ -7,7 +7,7 @@ pub fn query(t: TokenStream) -> crate::Result<TokenStream>
 	let (tokens, _rest) = parse_query(t);
 	let mut tokens = tokens.split(' ');
 
-	let meta = FIELD_MAP.lock().unwrap();
+	let meta = FIELD_MAP.lock();
 	let mut q = Vec::new();
 	while let Some(curr) = tokens.non_empty_next() {
 		if !["::__TABLE__", "::{"].iter().any(|v| curr.contains(v)) {

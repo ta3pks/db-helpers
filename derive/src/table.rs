@@ -1,6 +1,7 @@
 use std::{
-	collections::HashMap, sync::{Arc, Mutex}
+	collections::HashMap, sync::Arc
 };
+use parking_lot::Mutex;
 
 use super::{
 	parsers::{self, parse_fields, FieldInfo, ParsedRootMeta}, pg
@@ -24,7 +25,7 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 		..
 	} = parsers::parse_root(&root)?;
 	{
-		let mut map = FIELD_MAP.lock().unwrap();
+		let mut map = FIELD_MAP.lock();
 		map.insert(format!("{name}.__TABLE__"), table_name.to_string());
 	}
 	let fields = parse_fields(&fields.named)?;
@@ -54,7 +55,7 @@ pub fn table(t: TokenStream) -> crate::Result<TokenStream>
 
 fn field_getters(struct_name: &Ident, fields: &[FieldInfo])
 {
-	let mut meta = FIELD_MAP.lock().unwrap();
+	let mut meta = FIELD_MAP.lock();
 	fields.iter().for_each(|FieldInfo { name, db_name, .. }| {
 		meta.insert(format!("{struct_name}.{name}"), db_name.to_string());
 	});
