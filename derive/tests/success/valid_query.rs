@@ -19,6 +19,21 @@ struct Bar
 }
 fn main()
 {
+	//raw string literals should work
+	assert_eq!(
+		Q!(r#"select Foo::{_bar} from Foo::__TABLE__"#),
+		r#"select "bar" from foos"#
+	);
+	assert_eq!(
+		Q!(r"select Foo::{_bar} from Foo::__TABLE__"),
+		r#"select "bar" from foos"#
+	);
+	assert_eq!(
+		Q!(r#"select
+ Foo::{_bar} from Foo::__TABLE__"#)
+		.replace("\n", ""),
+		r#"select "bar" from foos"#
+	);
 	assert_eq!(
 		Q!("select Foo::{_bar} from Foo::__TABLE__"),
 		r#"select "bar" from foos"#

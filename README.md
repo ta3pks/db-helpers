@@ -77,7 +77,7 @@ Please check [changelog](https://github.com/NikosEfthias/db-helpers/blob/master/
 
 # TODO:
 - [x] allow using format macro inside Q
-- [ ] add support for raw string literals
+- [x] add support for raw string literals
 - [ ] *- operator meaning all fields but the defined ones `Users::{*-password}`
 - [ ] infer postgres types from rust type where possible making `q` argument optional
 - [ ] parse `Q` smarter to allow using spaces in more places as well as no spaces in places like inserts

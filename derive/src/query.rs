@@ -1,6 +1,6 @@
 use super::table::FIELD_MAP;
 use proc_macro2::{TokenStream, TokenTree};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 
 pub fn query(t: TokenStream) -> crate::Result<TokenStream>
 {
@@ -145,12 +145,11 @@ fn parse_query(t: TokenStream) -> (String, Option<TokenStream>)
 {
 	let mut tokens = t.into_iter();
 	let q = if let Some(TokenTree::Literal(l)) = tokens.next() {
-		l.to_string()
-			.strip_prefix('"')
-			.expect("expecting a string literal")
-			.strip_suffix('"')
-			.expect("expecting a string literal")
-			.to_string()
+		let l = syn::parse2::<syn::Lit>(l.to_token_stream()).expect("expected literal");
+		match l {
+			syn::Lit::Str(s) => s.value(),
+			_ => panic!("expected a string literal"),
+		}
 	} else {
 		panic!("expected a string literal");
 	};
