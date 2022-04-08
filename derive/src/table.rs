@@ -1,7 +1,5 @@
-use std::{
-	collections::HashMap, sync::Arc
-};
 use parking_lot::Mutex;
+use std::{collections::HashMap, sync::Arc};
 
 use super::{
 	parsers::{self, parse_fields, FieldInfo, ParsedRootMeta}, pg

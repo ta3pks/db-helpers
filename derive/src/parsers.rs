@@ -30,7 +30,7 @@ pub fn parse_root(i: &DeriveInput) -> crate::Result<ParsedRootMeta>
 					table_name: attrs
 						.get("name")
 						.map(|v| v.value.clone())
-						.unwrap_or_else(|| i.ident.to_string()),
+						.unwrap_or_else(|| i.ident.to_string().to_lowercase()),
 					index: attrs.get("index").map(|v| v.value.clone()),
 				})
 			}
